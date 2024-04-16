@@ -1,0 +1,19 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-left: 50px;
+}
+
+.inputBase {
+  width: 380px;
+  margin: 5px;
+  height: 48px;
+  border: none;
+  outline: none;
+
+  border: 1px solid #ccc;
+  &.focused {
+    border-bottom: 2px solid #259ac2;
+  }
+}
