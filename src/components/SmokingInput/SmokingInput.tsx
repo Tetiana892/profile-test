@@ -1,211 +1,299 @@
-import { useState, FC } from "react";
+import React, { useState } from "react";
+import {
+  FormControlLabel,
+  IconButton,
+  InputAdornment,
+  InputBase,
+  Popover,
+  Radio,
+  RadioGroup,
+  Checkbox,
+  Typography,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import InputBase from "@mui/material/InputBase";
-import InputButton from "./InputButton";
+import styles from "./SmokingInput.module.scss";
 
-const SmokingInput: FC = () => {
-  const [showOptions, setShowOptions] = useState(false);
-  const [selectedOption, setSelectedOption] = useState<string>("");
-  const [selectedCigarettes, setSelectedCigarettes] = useState<string[]>([]);
-  const [selectedLimitation, setSelectedLimitation] = useState<string>("");
-  const [inputValue, setInputValue] = useState<string>("");
+const SmokingInput: React.FC = () => {
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [value, setValue] = useState<string>("");
+  const [inputIcon, setInputIcon] = useState<JSX.Element>(
+    <KeyboardArrowDownIcon />
+  );
   const [isFocused, setIsFocused] = useState<boolean>(false);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
-  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setSelectedOption(value);
+  const [inputError, setInputError] = useState<string>("");
+  const [radioValue, setRadioValue] = useState<string>("");
 
-    if (value === "Палю") {
-      setShowOptions(true); // показуємо список опцій при виборі опції "Палю"
-    } else if (value === "Не палю") {
-      setShowOptions(false); // при виборі іншої опції скриваємо
-      setSelectedCigarettes([]); // скидаємо обрані опції при виборі "Не палю"
-      setSelectedLimitation(""); // скидаємо обрані радіобатони при виборі "Не палю"
-    }
-  };
-
-  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = event.target;
-    const updatedCigarettes = checked
-      ? [...selectedCigarettes, value]
-      : selectedCigarettes.filter((item) => item !== value);
-    setSelectedCigarettes(updatedCigarettes);
-    updateSelectedOption(selectedOption, updatedCigarettes, selectedLimitation);
-  };
-
-  const handleLimitationChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { value } = event.target;
-    setSelectedLimitation(value);
-    updateSelectedOption(selectedOption, selectedCigarettes, value);
-  };
-
-  const updateSelectedOption = (
-    option: string,
-    cigarettes: string[],
-    limitation: string
-  ) => {
-    let selectedValue = option;
-
-    if (option === "Палю") {
-      if (cigarettes.length > 0) {
-        selectedValue += ` ${cigarettes.join(", ")}`;
-      } else {
-        selectedValue = "Виберіть хоча б один вид паління";
-      }
-      if (limitation) {
-        selectedValue += ` ${limitation}`;
-      }
-    }
-    setSelectedOption(selectedValue);
-  };
-
-  const handleInputFocus = () => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
     setIsFocused(true);
+    if (!value) {
+      setInputIcon(<KeyboardArrowDownIcon />);
+    } else {
+      setInputIcon(<CloseIcon />);
+    }
   };
 
-  const handleInputBlur = () => {
-    setIsFocused(false);
+  const handleClose = () => {
+    if (value !== "Палю") {
+      setAnchorEl(null);
+      setIsFocused(false);
+    }
   };
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const { value } = event.target;
-    setInputValue(value);
-    setShowOptions(!!value);
+
+  const handleOptionClick = (option: string) => {
+    if (option === "Палю") {
+      setSelectedOptions([]);
+      setRadioValue("");
+    }
+
+    setValue(option);
+
+    if (option !== "Палю") {
+      setAnchorEl(null);
+      setInputError("");
+      setInputIcon(<CloseIcon />);
+      setRadioValue(option);
+    } else {
+      setInputError("Виберіть хоча б один вид паління");
+      setInputIcon(<CloseIcon />);
+    }
+
+    if (["Ні", "Тільки на балконі", "Не в квартирі"].includes(option)) {
+      setAnchorEl(null);
+    }
   };
 
   const handleClearInput = () => {
-    setInputValue("");
-    setSelectedOption("");
-    setSelectedCigarettes([]);
-    setSelectedLimitation("");
+    setValue("");
+    setInputIcon(<KeyboardArrowDownIcon />);
+    setInputError("");
   };
 
-  const isInputEmpty = inputValue === "";
+  const handleCheckboxChange = (option: string) => {
+    let updatedOptions: string[];
+
+    if (selectedOptions.includes(option)) {
+      updatedOptions = selectedOptions.filter((item) => item !== option);
+    } else {
+      updatedOptions = [...selectedOptions, option];
+    }
+    setSelectedOptions(updatedOptions);
+
+    // let newValue = updatedOptions.length > 0 ? "Палю" : " ";
+    // if (newValue) {
+    //   newValue += ", " + updatedOptions.join(", ");
+    // }
+
+    let newValue =
+      updatedOptions.length > 0 ? "Палю, " + updatedOptions.join(", ") : "";
+    setValue(newValue);
+
+    if (updatedOptions.length === 0) {
+      setInputError("Виберіть хоча б один вид паління");
+    } else {
+      setInputError("");
+    }
+
+    let newRadioValue = radioValue;
+
+    if (radioValue !== "" && updatedOptions.length > 0) {
+      newValue += `, ${newRadioValue}`;
+      setValue(newValue);
+    }
+  };
+
+  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setRadioValue(event.target.value);
+    // Закрыть Popover после выбора радиобаттона "Готовий обмежетись"
+    if (
+      event.target.value === "Ні" ||
+      event.target.value === "Тільки на балконі" ||
+      event.target.value === "Не в квартирі"
+    ) {
+      handleClose();
+    }
+  };
 
   return (
-    <div>
-      <label>Паління</label>
-      <div
-        className={`input-conteiner ${isFocused ? "focused" : ""}`}
-        onClick={() => setShowOptions(!showOptions)}
-      >
+    <div className={styles.container}>
+      <Typography variant="body1" gutterBottom>
+        Паління
+      </Typography>
+      <div>
         <InputBase
           type="text"
-          value={inputValue || selectedOption}
-          onFocus={handleInputFocus}
-          onBlur={handleInputBlur}
-          onChange={handleInputChange}
-          readOnly={!isInputEmpty}
+          className={`${styles.inputBase} ${
+            (value && isFocused) || inputError ? styles.focused : ""
+          }`}
+          style={{ color: inputError ? "red" : "inherit" }}
+          value={inputError || value}
+          onChange={(e) => setValue(e.target.value)}
           endAdornment={
             <InputAdornment position="end">
               <IconButton
-                onClick={
-                  isInputEmpty
-                    ? () => setShowOptions(!showOptions)
-                    : handleClearInput
-                }
+                onClick={value || inputError ? handleClearInput : handleClick}
               >
-                {isInputEmpty ? <KeyboardArrowDownIcon /> : <CloseIcon />}
+                {inputIcon}
               </IconButton>
             </InputAdornment>
           }
         />
       </div>
-      {showOptions && (
-        <div className="options-container">
-          <label>
-            <input
-              type="radio"
+      <Popover
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+        sx={{
+          top: "45px",
+          left: "-340px",
+        }}
+      >
+        <RadioGroup
+          value={value}
+          onChange={(e) => handleOptionClick(e.target.value)}
+          sx={{ width: "360px", paddingLeft: "20px" }}
+        >
+          <div>
+            <FormControlLabel
               value="Палю"
-              checked={selectedOption === "Палю"}
-              onChange={handleOptionChange}
+              control={
+                <Radio
+                  sx={{
+                    "&.Mui-checked": {
+                      color: "#259ac2",
+                    },
+                  }}
+                />
+              }
+              label="Палю"
             />
-            Палю
-          </label>
-          {selectedOption === "Палю" && (
-            <div>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Цигарки"
-                  checked={selectedCigarettes.includes("Цигарки")}
-                  onChange={handleCheckboxChange}
+            {value === "Палю" && (
+              <div style={{ paddingLeft: "20px" }}>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedOptions.includes("Цигарки")}
+                      onChange={() => handleCheckboxChange("Цигарки")}
+                      sx={{
+                        "&.Mui-checked": {
+                          color: "#259ac2",
+                        },
+                      }}
+                    />
+                  }
+                  label="Цигарки"
                 />
-                Цигарки
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Вейп"
-                  checked={selectedCigarettes.includes("Вейп")}
-                  onChange={handleCheckboxChange}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedOptions.includes("Вейп")}
+                      onChange={() => handleCheckboxChange("Вейп")}
+                      sx={{
+                        "&.Mui-checked": {
+                          color: "#259ac2",
+                        },
+                      }}
+                    />
+                  }
+                  label="Вейп"
                 />
-                Вейп
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="Тютюн"
-                  checked={selectedCigarettes.includes("Тютюн")}
-                  onChange={handleCheckboxChange}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedOptions.includes("Тютюн")}
+                      onChange={() => handleCheckboxChange("Тютюн")}
+                      sx={{
+                        "&.Mui-checked": {
+                          color: "#259ac2",
+                        },
+                      }}
+                    />
+                  }
+                  label="Тютюн"
                 />
-                Тютюн
-              </label>
-              <label>
-                <input
-                  type="checkbox"
-                  value="IQOS"
-                  checked={selectedCigarettes.includes("IQOS")}
-                  onChange={handleCheckboxChange}
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={selectedOptions.includes("IQOS")}
+                      onChange={() => handleCheckboxChange("IQOS")}
+                      sx={{
+                        "&.Mui-checked": {
+                          color: "#259ac2",
+                        },
+                      }}
+                    />
+                  }
+                  label="IQOS"
                 />
-                IQOS
-              </label>
-              <p>Готовий обмежетись?</p>
-              <label>
-                <input
-                  type="radio"
-                  value="Ні"
-                  checked={selectedLimitation === "Ні"}
-                  onChange={handleLimitationChange}
-                />
-                Ні
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="Тільки на балконі"
-                  checked={selectedLimitation === "Тільки на балконі"}
-                  onChange={handleLimitationChange}
-                />
-                Тільки на балконі
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="Не в квартирі"
-                  checked={selectedLimitation === "Не в квартирі"}
-                  onChange={handleLimitationChange}
-                />
-                Не в квартирі
-              </label>
-            </div>
-          )}
-          <label>
-            <input
-              type="radio"
-              value="Не курящі"
-              checked={selectedOption === "Не курящі"}
-              onChange={handleOptionChange}
-            />
-            Не палю
-          </label>
-        </div>
-      )}
-      <InputButton />
+                <Typography
+                  variant="body1"
+                  gutterBottom
+                  style={{ marginTop: "10px" }}
+                >
+                  Готовий обмежетись?
+                </Typography>
+                <RadioGroup value={radioValue} onChange={handleRadioChange}>
+                  <FormControlLabel
+                    value="Ні"
+                    control={
+                      <Radio
+                        sx={{
+                          "&.Mui-checked": {
+                            color: "#259ac2",
+                          },
+                        }}
+                      />
+                    }
+                    label="Ні"
+                  />
+                  <FormControlLabel
+                    value="Тільки на балконі"
+                    control={
+                      <Radio
+                        sx={{
+                          "&.Mui-checked": {
+                            color: "#259ac2",
+                          },
+                        }}
+                      />
+                    }
+                    label="Тільки на балконі"
+                  />
+                  <FormControlLabel
+                    value="Не в квартирі"
+                    control={
+                      <Radio
+                        sx={{
+                          "&.Mui-checked": {
+                            color: "#259ac2",
+                          },
+                        }}
+                      />
+                    }
+                    label="Не в квартирі"
+                  />
+                </RadioGroup>
+              </div>
+            )}
+          </div>
+          <FormControlLabel
+            value="Не курящі"
+            control={
+              <Radio
+                sx={{
+                  "&.Mui-checked": {
+                    color: "#259ac2",
+                  },
+                }}
+              />
+            }
+            label="Не палю"
+          />
+        </RadioGroup>
+      </Popover>
     </div>
   );
 };
