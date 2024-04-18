@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { FC, useState } from "react";
 import {
   FormControlLabel,
   IconButton,
@@ -14,7 +14,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import styles from "./SmokingInput.module.scss";
 
-const SmokingInput: React.FC = () => {
+const SmokingInput: FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [value, setValue] = useState<string>("");
   const [inputIcon, setInputIcon] = useState<JSX.Element>(
@@ -73,19 +73,15 @@ const SmokingInput: React.FC = () => {
   };
 
   const handleCheckboxChange = (option: string) => {
+    const isSelected = selectedOptions.includes(option);
     let updatedOptions: string[];
 
-    if (selectedOptions.includes(option)) {
+    if (isSelected) {
       updatedOptions = selectedOptions.filter((item) => item !== option);
     } else {
       updatedOptions = [...selectedOptions, option];
     }
     setSelectedOptions(updatedOptions);
-
-    // let newValue = updatedOptions.length > 0 ? "Палю" : " ";
-    // if (newValue) {
-    //   newValue += ", " + updatedOptions.join(", ");
-    // }
 
     let newValue =
       updatedOptions.length > 0 ? "Палю, " + updatedOptions.join(", ") : "";
@@ -104,16 +100,10 @@ const SmokingInput: React.FC = () => {
       setValue(newValue);
     }
   };
-
-  const handleRadioChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRadioValue(event.target.value);
-    // Закрыть Popover после выбора радиобаттона "Готовий обмежетись"
-    if (
-      event.target.value === "Ні" ||
-      event.target.value === "Тільки на балконі" ||
-      event.target.value === "Не в квартирі"
-    ) {
-      handleClose();
+  const handleRadioChange = (value: string) => {
+    setRadioValue(value);
+    if (selectedOptions.length > 0 && value !== "") {
+      setAnchorEl(null); // закрываем меню, если выбраны опции и радиобаттон
     }
   };
 
@@ -172,74 +162,12 @@ const SmokingInput: React.FC = () => {
             />
             {value === "Палю" && (
               <div style={{ paddingLeft: "20px" }}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedOptions.includes("Цигарки")}
-                      onChange={() => handleCheckboxChange("Цигарки")}
-                      sx={{
-                        "&.Mui-checked": {
-                          color: "#259ac2",
-                        },
-                      }}
-                    />
-                  }
-                  label="Цигарки"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedOptions.includes("Вейп")}
-                      onChange={() => handleCheckboxChange("Вейп")}
-                      sx={{
-                        "&.Mui-checked": {
-                          color: "#259ac2",
-                        },
-                      }}
-                    />
-                  }
-                  label="Вейп"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedOptions.includes("Тютюн")}
-                      onChange={() => handleCheckboxChange("Тютюн")}
-                      sx={{
-                        "&.Mui-checked": {
-                          color: "#259ac2",
-                        },
-                      }}
-                    />
-                  }
-                  label="Тютюн"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={selectedOptions.includes("IQOS")}
-                      onChange={() => handleCheckboxChange("IQOS")}
-                      sx={{
-                        "&.Mui-checked": {
-                          color: "#259ac2",
-                        },
-                      }}
-                    />
-                  }
-                  label="IQOS"
-                />
-                <Typography
-                  variant="body1"
-                  gutterBottom
-                  style={{ marginTop: "10px" }}
-                >
-                  Готовий обмежетись?
-                </Typography>
-                <RadioGroup value={radioValue} onChange={handleRadioChange}>
+                <div className={styles.wrapperChackbox}>
                   <FormControlLabel
-                    value="Ні"
                     control={
-                      <Radio
+                      <Checkbox
+                        checked={selectedOptions.includes("Цигарки")}
+                        onChange={() => handleCheckboxChange("Цигарки")}
                         sx={{
                           "&.Mui-checked": {
                             color: "#259ac2",
@@ -247,12 +175,13 @@ const SmokingInput: React.FC = () => {
                         }}
                       />
                     }
-                    label="Ні"
+                    label="Цигарки"
                   />
                   <FormControlLabel
-                    value="Тільки на балконі"
                     control={
-                      <Radio
+                      <Checkbox
+                        checked={selectedOptions.includes("Вейп")}
+                        onChange={() => handleCheckboxChange("Вейп")}
                         sx={{
                           "&.Mui-checked": {
                             color: "#259ac2",
@@ -260,12 +189,13 @@ const SmokingInput: React.FC = () => {
                         }}
                       />
                     }
-                    label="Тільки на балконі"
+                    label="Вейп"
                   />
                   <FormControlLabel
-                    value="Не в квартирі"
                     control={
-                      <Radio
+                      <Checkbox
+                        checked={selectedOptions.includes("Тютюн")}
+                        onChange={() => handleCheckboxChange("Тютюн")}
                         sx={{
                           "&.Mui-checked": {
                             color: "#259ac2",
@@ -273,9 +203,72 @@ const SmokingInput: React.FC = () => {
                         }}
                       />
                     }
-                    label="Не в квартирі"
+                    label="Тютюн"
                   />
-                </RadioGroup>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={selectedOptions.includes("IQOS")}
+                        onChange={() => handleCheckboxChange("IQOS")}
+                        sx={{
+                          "&.Mui-checked": {
+                            color: "#259ac2",
+                          },
+                        }}
+                      />
+                    }
+                    label="IQOS"
+                  />
+                </div>
+                <div className={styles.wrapperRadioGroup}>
+                  <Typography variant="body1" gutterBottom>
+                    Готовий обмежетись?
+                  </Typography>
+                  <RadioGroup
+                    value={radioValue}
+                    onChange={(e) => handleRadioChange(e.target.value)}
+                  >
+                    <FormControlLabel
+                      value="Ні"
+                      control={
+                        <Radio
+                          sx={{
+                            "&.Mui-checked": {
+                              color: "#259ac2",
+                            },
+                          }}
+                        />
+                      }
+                      label="Ні"
+                    />
+                    <FormControlLabel
+                      value="Тільки на балконі"
+                      control={
+                        <Radio
+                          sx={{
+                            "&.Mui-checked": {
+                              color: "#259ac2",
+                            },
+                          }}
+                        />
+                      }
+                      label="Тільки на балконі"
+                    />
+                    <FormControlLabel
+                      value="Не в квартирі"
+                      control={
+                        <Radio
+                          sx={{
+                            "&.Mui-checked": {
+                              color: "#259ac2",
+                            },
+                          }}
+                        />
+                      }
+                      label="Не в квартирі"
+                    />
+                  </RadioGroup>
+                </div>
               </div>
             )}
           </div>
