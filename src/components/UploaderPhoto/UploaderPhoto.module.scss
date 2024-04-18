@@ -1,0 +1,109 @@
+.dropzone {
+  position: relative;
+  background: #707e93;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  width: 340px;
+  height: 291px;
+}
+
+.dropzoneContent {
+  text-align: center;
+}
+
+.cameraIcon {
+  margin-bottom: 50px;
+  transform: scaleX(-1);
+  color: white;
+}
+
+.downDropzone {
+  position: absolute;
+  left: 0%;
+  top: 77%;
+  display: flex;
+
+  gap: 5px;
+  align-items: center;
+  justify-content: start;
+  padding: 10px 12px;
+  background: #d7e2e9;
+  width: 317px;
+}
+
+.text {
+  padding-left: 6px;
+  width: 116px;
+  height: 36px;
+  font-size: 10px;
+  text-align: start;
+  color: #707e93;
+  font-weight: 500;
+}
+.iconUp {
+  color: #707e93;
+}
+
+.dropzoneContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.imageContainer {
+  max-width: 100%;
+  max-height: 300px;
+  overflow: hidden;
+}
+
+.uploadedImage {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.textLoader {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 16.59px;
+  text-align: center;
+  color: #d7e2e9;
+}
+
+.loader {
+  color: #d7e2e9;
+}
+
+.uploadedImageContainer {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 324px;
+  background-color: rgba(215, 226, 233, 0.8);
+  color: #707e93;
+  padding: 8px;
+}
+
+.imageContainer:hover .uploadedImageContainer {
+  display: block; /* Показываем контейнер при наведении на изображение */
+}
+.title {
+  text-decoration: underline;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 16.59px;
+  text-align: left;
+}
+.textHover {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 11.85px;
+  text-align: left;
+  width: 200px;
+}

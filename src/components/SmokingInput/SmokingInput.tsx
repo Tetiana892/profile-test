@@ -36,13 +36,6 @@ const SmokingInput: FC = () => {
     }
   };
 
-  const handleClose = () => {
-    if (value !== "Палю") {
-      setAnchorEl(null);
-      setIsFocused(false);
-    }
-  };
-
   const handleOptionClick = (option: string) => {
     if (option === "Палю") {
       setSelectedOptions([]);
@@ -100,10 +93,11 @@ const SmokingInput: FC = () => {
       setValue(newValue);
     }
   };
+
   const handleRadioChange = (value: string) => {
     setRadioValue(value);
     if (selectedOptions.length > 0 && value !== "") {
-      setAnchorEl(null); // закрываем меню, если выбраны опции и радиобаттон
+      setAnchorEl(null);
     }
   };
 
@@ -116,7 +110,7 @@ const SmokingInput: FC = () => {
         <InputBase
           type="text"
           className={`${styles.inputBase} ${
-            (value && isFocused) || inputError ? styles.focused : ""
+            (!value && isFocused) || inputError ? styles.focused : ""
           }`}
           style={{ color: inputError ? "red" : "inherit" }}
           value={inputError || value}
@@ -135,10 +129,15 @@ const SmokingInput: FC = () => {
       <Popover
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
-        onClose={handleClose}
+        onClose={() => {
+          if (radioValue) {
+            setAnchorEl(null);
+            setIsFocused(false);
+          }
+        }}
         sx={{
           top: "45px",
-          left: "-340px",
+          left: "-334px",
         }}
       >
         <RadioGroup
