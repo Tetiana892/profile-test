@@ -137,7 +137,7 @@ const SmokingInput: FC = () => {
         }}
         sx={{
           top: "45px",
-          left: "-334px",
+          left: "-340px",
         }}
       >
         <RadioGroup

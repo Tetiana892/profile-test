@@ -7,11 +7,7 @@
   align-items: center;
   cursor: pointer;
   width: 340px;
-  height: 291px;
-}
-
-.dropzoneContent {
-  text-align: center;
+  height: 290px;
 }
 
 .cameraIcon {
@@ -56,8 +52,10 @@
 }
 
 .imageContainer {
-  max-width: 100%;
-  max-height: 300px;
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  height: auto;
   overflow: hidden;
 }
 
@@ -79,20 +77,20 @@
   color: #d7e2e9;
 }
 
-.uploadedImageContainer {
-  display: none;
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 324px;
-  background-color: rgba(215, 226, 233, 0.8);
-  color: #707e93;
-  padding: 8px;
-}
+// .uploadedImageContainer {
+//   display: none;
+//   position: absolute;
+//   bottom: 0;
+//   left: 0;
+//   width: 324px;
+//   background-color: rgba(215, 226, 233, 0.8);
+//   color: #707e93;
+//   padding: 8px;
+// }
 
-.imageContainer:hover .uploadedImageContainer {
-  display: block; /* Показываем контейнер при наведении на изображение */
-}
+// .imageContainer:hover .uploadedImageContainer {
+//   display: block;
+// }
 .title {
   text-decoration: underline;
   font-size: 14px;
@@ -107,3 +105,34 @@
   text-align: left;
   width: 200px;
 }
+.range {
+  display: flex;
+  align-items: center;
+  height: 43px;
+}
+
+.rangeWrapper {
+  display: flex;
+  justify-content: space-between;
+  background-color: rgba(215, 226, 233, 0.8);
+  position: relative;
+  top: -45px;
+}
+.button {
+  border: none;
+  background: transparent;
+  outline: none;
+}
+.icon {
+  cursor: pointer;
+}
+/* <div
+              className={`${styles.uploadedImageContainer} ${
+                isEdited && isSaveClicked ? styles.hoverVisible : ""
+              }`}
+            >
+              <h2 className={styles.title}>Изменить фото</h2>
+              <p className={styles.textHover}>
+                Лицо. Размер: 200x200px jpeg, jpg, png, heic, heif
+              </p>
+            </div> */

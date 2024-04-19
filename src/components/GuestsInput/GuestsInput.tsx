@@ -74,7 +74,7 @@ const GuestsInput: FC = () => {
         onClose={handleClose}
         sx={{
           top: "45px",
-          left: "-334px",
+          left: "-340px",
         }}
       >
         <RadioGroup
