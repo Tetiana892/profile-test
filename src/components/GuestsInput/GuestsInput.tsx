@@ -5,13 +5,12 @@ import {
   RadioGroup,
   Typography,
   Radio,
-  InputAdornment,
-  IconButton,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import React, { FC, useState } from "react";
 import styles from "../SmokingInput/SmokingInput.module.scss";
+import CustomIconButton from "../CustomIconButton";
 
 const GuestsInput: FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -61,11 +60,12 @@ const GuestsInput: FC = () => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         endAdornment={
-          <InputAdornment position="end">
-            <IconButton onClick={value ? handleClearInput : handleClick}>
-              {inputIcon}
-            </IconButton>
-          </InputAdornment>
+          <CustomIconButton
+            value={value}
+            handleClearInput={handleClearInput}
+            handleClick={handleClick}
+            inputIcon={inputIcon}
+          />
         }
       />
       <Popover

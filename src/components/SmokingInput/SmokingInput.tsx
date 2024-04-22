@@ -1,8 +1,6 @@
 import { FC, useState } from "react";
 import {
   FormControlLabel,
-  IconButton,
-  InputAdornment,
   InputBase,
   Popover,
   RadioGroup,
@@ -15,6 +13,7 @@ import styles from "./SmokingInput.module.scss";
 import CustomRadio from "../CustomRadio";
 import ReadyToLimit from "./ReadyToLimit";
 import CheckboxGroup from "./CheckboxGroup";
+import CustomIconButton from "../CustomIconButton";
 
 const SmokingInput: FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -121,19 +120,20 @@ const SmokingInput: FC = () => {
         <InputBase
           type="text"
           className={`${styles.inputBase} ${
-            (value && isFocused) || inputError ? styles.focused : ""
+            (inputError && styles.focused) ||
+            (value && isFocused && styles.focused)
           }`}
           style={{ color: inputError ? "red" : "inherit" }}
           value={inputError || value}
           onChange={(e) => setValue(e.target.value)}
           endAdornment={
-            <InputAdornment position="end">
-              <IconButton
-                onClick={value || inputError ? handleClearInput : handleClick}
-              >
-                {inputIcon}
-              </IconButton>
-            </InputAdornment>
+            <CustomIconButton
+              value={value}
+              inputError={inputError}
+              handleClearInput={handleClearInput}
+              handleClick={handleClick}
+              inputIcon={inputIcon}
+            />
           }
         />
       </div>
