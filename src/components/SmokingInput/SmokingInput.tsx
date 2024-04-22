@@ -100,7 +100,16 @@ const SmokingInput: FC = () => {
         setInputError("");
       }
     }
+
+    const newValue =
+      selectedOptions.length > 0
+        ? "Палю, " + selectedOptions.join(", ") + `, ${value}`
+        : value;
+    setValue(newValue);
     setRadioValue(value);
+
+    setAnchorEl(null);
+    setIsFocused(false);
   };
 
   return (
