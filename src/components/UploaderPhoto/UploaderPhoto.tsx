@@ -1,72 +1,89 @@
-import React, { useCallback, useState, useEffect } from "react";
-import { useDropzone } from "react-dropzone";
+import React, { useState, FC, useRef } from "react";
 import AvatarEditor from "react-avatar-editor";
 import AddAPhotoOutlinedIcon from "@mui/icons-material/AddAPhotoOutlined";
 import UploadIcon from "@mui/icons-material/Upload";
-import AddIcon from "@mui/icons-material/Add";
-import RemoveIcon from "@mui/icons-material/Remove";
-import CloseIcon from "@mui/icons-material/Close";
-import DoneIcon from "@mui/icons-material/Done";
 import CircularProgress from "@mui/material/CircularProgress";
 import styles from "./UploaderPhoto.module.scss";
+import { saveImage } from "./PhotoSaver";
+import ImageControls from "./ImageControls";
+import useImageDropzone from "../../hooks/utils/useImageDropzone";
 
 interface UploaderPhotoProps {
   onUpload: (file: File) => void;
 }
 
-const UploaderPhoto: React.FC<UploaderPhotoProps> = ({ onUpload }) => {
+const UploaderPhoto: FC<UploaderPhotoProps> = ({ onUpload }) => {
+  const editorRef = useRef<AvatarEditor>(null);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [editor, setEditor] = useState<AvatarEditor | null>(null);
   const [scale, setScale] = useState<number>(1);
-  const [isEdited, setIsEdited] = useState<boolean>(false);
+  const [isPhotoUploaded, setIsPhotoUploaded] = useState<boolean>(false);
+  const [isControlsEnabled, setIsControlsEnabled] = useState(true);
+
   const [isSaveClicked, setIsSaveClicked] = useState<boolean>(false);
-  const [imageUploaded, setImageUploaded] = useState<boolean>(false);
+  const [isPhotoEdited, setIsPhotoEdited] = useState<boolean>(false);
+  const [, setIsChangePhotoClicked] = useState<boolean>(false);
 
-  const onDrop = useCallback(
-    (acceptedFiles: File[]) => {
-      if (!imageUploaded) {
-        const file = acceptedFiles[0];
-        setIsLoading(true);
-        setImageUploaded(true);
-        onUpload(file);
-        const reader = new FileReader();
-        reader.onload = () => {
-          const dataUrl = reader.result as string;
-          setImageSrc(dataUrl);
-          setIsLoading(false);
-        };
-        reader.readAsDataURL(file);
-      }
-    },
-    [onUpload, imageUploaded]
+  const handleDrop = (acceptedFiles: File[]) => {
+    setIsSaveClicked(false);
+    setIsPhotoEdited(false);
+    if (!isPhotoUploaded) {
+      const file = acceptedFiles[0];
+      setIsLoading(true);
+      setTimeout(() => {
+        setImageSrc(URL.createObjectURL(file));
+        setIsLoading(false);
+      }, 2000);
+    }
+  };
+
+  const { getRootProps, getInputProps } = useImageDropzone(
+    handleDrop,
+    isPhotoUploaded,
+    setIsLoading,
+    setImageSrc
   );
-
-  const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newScale = parseFloat(e.target.value);
     setScale(newScale);
-    setIsEdited(true);
   };
 
   const handleSaveClick = () => {
+    setIsPhotoUploaded(true);
+    setIsControlsEnabled(false);
     setIsSaveClicked(true);
-    // Additional logic for saving the image
+    setIsPhotoEdited(true);
+
+    const editor = editorRef.current;
+    if (editor) {
+      saveImage(editor, onUpload)
+        .then(() => {})
+        .catch((error) => {
+          console.error("Failed to save image:", error);
+        });
+    } else {
+      console.error("Avatar editor element not found");
+    }
   };
 
-  useEffect(() => {
-    return () => {
-      setImageUploaded(false); // Reset the imageUploaded state when the component unmounts
-    };
-  }, []);
+  const handleHoverChangeClick = () => {
+    setIsChangePhotoClicked(true);
+  };
+
+  const handleRemovePhoto = () => {
+    setIsPhotoUploaded(false);
+    setImageSrc(null);
+    setIsChangePhotoClicked(false);
+    setIsSaveClicked(false);
+  };
 
   return (
     <div className={styles.dropzone}>
       {imageSrc ? (
         <div className={styles.imageContainer}>
           <AvatarEditor
-            ref={(editor) => setEditor(editor)}
+            ref={editorRef}
             image={imageSrc}
             width={340}
             height={290}
@@ -74,41 +91,25 @@ const UploaderPhoto: React.FC<UploaderPhotoProps> = ({ onUpload }) => {
             scale={scale}
             borderRadius={0}
           />
-          <div className={styles.rangeWrapper}>
-            <button className={styles.button}>
-              <CloseIcon
-                className={styles.icon}
-                sx={{ fontSize: 17, marginLeft: "10px", color: "#707e93" }}
-              />
-            </button>
-            <div className={styles.range}>
-              <RemoveIcon sx={{ fontSize: 12 }} />
-              <input
-                type="range"
-                min="1"
-                max="2"
-                step="0.01"
-                value={scale}
-                style={{ color: "red" }}
-                onChange={handleScaleChange}
-              />
-              <AddIcon sx={{ fontSize: 12 }} />
-            </div>
-            <button onClick={handleSaveClick} className={styles.button}>
-              <DoneIcon
-                className={styles.icon}
-                sx={{ fontSize: 17, marginRight: "10px", color: "#707e93" }}
-              />
-            </button>
-          </div>
+          {!isPhotoUploaded && (
+            <ImageControls
+              scale={scale}
+              handleScaleChange={handleScaleChange}
+              handleSaveClick={handleSaveClick}
+              isPhotoUploaded={isPhotoUploaded}
+              handleHoverChangeClick={handleHoverChangeClick}
+              handleRemovePhoto={handleRemovePhoto}
+              isControlsEnabled={isControlsEnabled}
+            />
+          )}
         </div>
       ) : (
         <div {...getRootProps()} className={styles.dropzoneContent}>
-          <input {...getInputProps()} accept="image/*" />
+          <input {...getInputProps()} />
           {isLoading ? (
             <div className={styles.loadingContainer}>
               <CircularProgress size={40} sx={{ color: "#d7e2e9" }} />
-              <p className={styles.textLoader}>Загрузка изображения...</p>
+              <p className={styles.textLoader}>Завантаження зображення...</p>
             </div>
           ) : (
             <>
@@ -119,11 +120,25 @@ const UploaderPhoto: React.FC<UploaderPhotoProps> = ({ onUpload }) => {
               <div className={styles.downDropzone}>
                 <UploadIcon className={styles.iconUp} />
                 <p className={styles.text}>
-                  Лицо. Размер: 200x200px jpeg, jpg, png, heic, heif
+                  Обличчя. До 20МБ 200x200px jpeg, jpg, png, heic, heif
                 </p>
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {isSaveClicked && isPhotoEdited && (
+        <div
+          className={`${styles.uploadedImageContainer} ${
+            isSaveClicked ? styles.hoverVisible : ""
+          }`}
+          onClick={handleRemovePhoto}
+        >
+          <h2 className={styles.title}>Змінити фото</h2>
+          <p className={styles.textHover}>
+            Обличчя. До 20МБ 200x200px jpeg, jpg, png, heic, heif
+          </p>
         </div>
       )}
     </div>

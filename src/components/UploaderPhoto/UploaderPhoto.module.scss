@@ -77,20 +77,26 @@
   color: #d7e2e9;
 }
 
-// .uploadedImageContainer {
-//   display: none;
-//   position: absolute;
-//   bottom: 0;
-//   left: 0;
-//   width: 324px;
-//   background-color: rgba(215, 226, 233, 0.8);
-//   color: #707e93;
-//   padding: 8px;
-// }
+.loadingContainer {
+  text-align: center;
+}
+.uploadedImageContainer {
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 324px;
+  background-color: rgba(215, 226, 233, 0.8);
+  color: #707e93;
+  padding: 8px;
+  &:hover {
+    display: block;
+  }
+}
+.imageContainer:hover + .uploadedImageContainer {
+  display: block;
+}
 
-// .imageContainer:hover .uploadedImageContainer {
-//   display: block;
-// }
 .title {
   text-decoration: underline;
   font-size: 14px;
@@ -126,13 +132,3 @@
 .icon {
   cursor: pointer;
 }
-/* <div
-              className={`${styles.uploadedImageContainer} ${
-                isEdited && isSaveClicked ? styles.hoverVisible : ""
-              }`}
-            >
-              <h2 className={styles.title}>Изменить фото</h2>
-              <p className={styles.textHover}>
-                Лицо. Размер: 200x200px jpeg, jpg, png, heic, heif
-              </p>
-            </div> */
